@@ -2,22 +2,49 @@
 import cv2
 import numpy as np
 
-def draw_circles(img, n=5):
-    nx, ny, channel = np.shape(img);
-    x = np.random.choice(nx, 5);
-    y = np.random.choice(ny, 5);
-    for i in range(n):
-        print(x[i], y[i])
-        cv2.circle(img, (y[i], x[i]), radius=5, color=(0, 255, 0), thickness=-1);
+def draw_circles(img, n=15):
     
-    return img;
+    lam = 670; #nm
+    pixel_size = 0.5;
+    fs = 1/pixel_size;
+    
+#     low = -fs/2;
+#     high = fs/2 * ((nx-2)/nx);
+    
+    nx, ny = np.shape(img);
+    low = 0;
+    high = fs/2 * ((nx-2)/nx) + fs/2;
+    
+    x = np.random.choice(nx, n).reshape((n, 1));
+    y = np.random.choice(ny, n).reshape((n, 1));
+    
+    r = np.random.uniform(0.8, 1.5, n).reshape((n, 1));
+    
+    phase = np.random.uniform(0.25, 0.75, n) / (2*np.pi);
+    phase = phase.reshape((n, 1));
+    
+    M = np.concatenate((x, y, np.round(r / pixel_size).astype(int), phase), axis=1);
+    M = np.concatenate((M, np.exp(M[:,2] * 2j * np.pi).reshape(n, 1)), axis=1);
+    
+    for i in range(n):
+        cv2.circle(img, (y[i], x[i]), radius=(np.round(r[i] / pixel_size)).astype(int), color=255, thickness=-1);
+    
+    img[img == 0] = 1;
+
+    ft = np.fft.fft2(img);
+#     print(M.shape, ft);
+    
+    return img, abs(ft);
 
 def main():
-    img = np.zeros((1024, 1024));
+    img = np.zeros((1000, 1000));
     cv2.imwrite('base.png', img);
     img = cv2.imread('base.png', cv2.IMREAD_COLOR);
-    img = draw_circles(img, 5)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) / 255.0
+
+    img, fourier = draw_circles(img)
     
     img = cv2.imwrite('circles_drawn.png', img);
+    fourier = cv2.imwrite('fourier.png', fourier)
     
 main();
