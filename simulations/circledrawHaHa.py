@@ -32,9 +32,9 @@ def draw_circles(img, n=15):
     img[img == 0] = 1;
 
     ft = np.fft.fft2(img);
-#     print(M.shape, ft);
+    print(np.log10(abs(ft)).shape, np.max(np.log10(abs(ft))), np.min(np.log10(abs(ft))));
     
-    return img, abs(ft);
+    return img, (np.log10(abs(ft)) - np.min(np.log10(abs(ft))))/(np.max(np.log10(abs(ft))) - np.min(np.log10(abs(ft)))) * 255;
 
 def main():
     img = np.zeros((1000, 1000));
