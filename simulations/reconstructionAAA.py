@@ -2,9 +2,22 @@
 import cv2
 import numpy as np
 
-def reconstruct(img):
+def reconstruct(img, it=5):
     
+    nx, ny = np.shape(img);
     
+    # random initializations
+    H = img;
+    W = np.random.rand(nx,ny)
+    mu = 0
+    X = np.zeros((nx,ny))
+
+    for i in it:
+        
+        W = 
+        
+        
+        
     
     return 
 
