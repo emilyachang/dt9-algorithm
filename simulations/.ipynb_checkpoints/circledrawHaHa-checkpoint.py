@@ -2,6 +2,8 @@
 import cv2
 import numpy as np
 
+from LFI_recon import SPR_recon
+
 def draw_circles(img, n=15):
     
     # declare parameters
