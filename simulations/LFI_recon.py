@@ -11,7 +11,9 @@ Based on the algorithm described in the paper:
 import numpy as np
 from scipy.fftpack import fft2, ifft2 
 import cv2
-
+import matplotlib.pyplot as plt
+import skimage
+from skimage import transform
 
 def WAS_xfer(z, wave_len, img_size, pixel_dim):
     """Function to return the WAS transfer function at a given depth z.
@@ -114,16 +116,18 @@ def SPR_recon(H, z, lam=1.0, wave_len=637e-9, pixel_dim=1.12e-6, num_iter=10):
     
     return X, X_ll, mu, W
         
-if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+def main():
     
     #Make a basic phase image with a simple square of shifted phase in the middle
     I = cv2.imread('circles_drawn.png',cv2.IMREAD_GRAYSCALE)
-    I[I==255] = np.exp(np.pi*1.0j)
+    I = I/1
+    I = skimage.transform.downscale_local_mean(I, (4,4))
+    print(np.max(I), np.min(I), I[0,0].dtype)
+    I[I>1] = np.exp(np.pi*1.0j)
     
     #Make the hologram by projecting to the image plane
-    z = 500e-6
-    T = WAS_xfer(z, 637e-9, I.shape, 1.12e-6)
+    z = 1500e-6
+    T = WAS_xfer(z, 405e-9, I.shape, 1.12e-6) #637e-9
     H = np.abs(ifft2(T*fft2(I)))
     
     #Scale the hologram to the range [0,16]
@@ -131,16 +135,56 @@ if __name__ == '__main__':
     H = 16*H/np.max(H)
     
     #Now do the reconstruction
-    X, X_ll, mu, W = SPR_recon(H, z)
+    X, X_ll, mu, W = SPR_recon(H, z, wave_len=405e-9)
     
     #Make an image of the hologram and the reconstruction
     #Note that the reconstruction has the background illumination (mu)
     #subtracted out.    
-    plt.figure()
-    plt.imshow(H)
+    A = plt.figure()
+    plt.imshow(H, cmap='gray')
     plt.title('Hologram')
-    
-    plt.figure()
-    plt.imshow(np.abs(X))
+    A.savefig('1500micronsHologram.png')
+
+    B = plt.figure()
+    plt.imshow(np.abs(X), cmap='gray')
     plt.title('Reconstruction')
+    B.savefig('1500micronsReconstruction.png')
+    
     plt.show()
+    
+def comparingReconstructions():
+#     I500 = cv2.imread('500micronsReconstruction.png',cv2.IMREAD_GRAYSCALE) / 1
+#     I1000 = cv2.imread('1000micronsReconstruction.png',cv2.IMREAD_GRAYSCALE) / 1
+#     I1500 = cv2.imread('1500micronsReconstruction.png',cv2.IMREAD_GRAYSCALE) / 1
+    
+#     print(np.max(I500), np.max(I1000), np.max(I1500))
+#     print(np.max(np.abs(I500 - I1000)), np.max(np.abs(I500 - I1500)), np.max(np.abs(I1500 - I1000)))
+    
+#     A = plt.figure()
+#     plt.imshow(np.abs(I500 - I1000), cmap='gray');
+#     plt.title('500 1000')
+    
+#     B = plt.figure()
+#     plt.imshow(np.abs(I500 - I1500), cmap='gray');
+#     plt.title('500 1500')
+    
+#     C = plt.figure()
+#     plt.imshow(np.abs(I1000 - I1500), cmap='gray');
+#     plt.title('1500 1000')
+    
+#     plt.show()
+
+    quarter = cv2.imread('downSampledReconstruction.png',cv2.IMREAD_GRAYSCALE) / 1
+    more_than_quarter = cv2.imread('downSampledReconstruction_4_4.png',cv2.IMREAD_GRAYSCALE) / 1
+    
+    print(np.max(quarter), np.max(more_than_quarter))
+    print(np.max(np.abs(quarter - more_than_quarter)))
+    
+    A = plt.figure()
+    plt.imshow(np.abs(quarter - more_than_quarter), cmap='gray');
+    plt.title('quarter more_than_quarter')
+    
+    plt.show()
+
+main();
+comparingReconstructions()
