@@ -184,6 +184,7 @@ if __name__ == '__main__':
 
     for z in z_range:     
         plt.figure(figsize=(10,12))
+        plt.suptitle('%4.0fum Focal Depth' % (z*10e5))
         
         # get hologram and reconstruction arrays from algorithm
         I_hol, I_recon = createImage(I,z)
