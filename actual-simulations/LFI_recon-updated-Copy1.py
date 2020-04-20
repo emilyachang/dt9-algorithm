@@ -185,7 +185,7 @@ def compareRecon(im1, im2):
 if __name__ == '__main__':
     
     # original image (0.5 um/pixel)
-    I = cv2.imread('circles_drawn.png',cv2.IMREAD_GRAYSCALE)
+    I = cv2.imread('circles_drawn25.png',cv2.IMREAD_GRAYSCALE)
     I = I/1
     
     # sample over varying distances
@@ -229,7 +229,7 @@ if __name__ == '__main__':
         plt.colorbar()
         
         # save figure
-        plt.savefig('output-images/output-focaldepth_%04.0fmicrons.png' % (z*10e5))
+        plt.savefig('output-images/25-particles/output-focaldepth_%04.0fmicrons.png' % (z*10e5))
         
         # compare reconstruction intensities
         #compareRecon(I_recon, Idown_recon)
