@@ -133,12 +133,32 @@ def createImage(I,z,pixsize):
     #Scale the hologram to the range [0,16]
     H = H-np.min(H)
     H = 16*H/np.max(H)
-    
+    H = (H-np.min(H))/(np.max(H)-np.min(H));
+
     #Now do the reconstruction; reconstruction has the background illumination (mu) subtracted out
     X, X_ll, mu, W = SPR_recon(H, z, wave_len=405e-9, pixel_dim=pixsize)
     H_recon = np.abs(X)
+    H_recon = (H_recon-np.min(H_recon))/(np.max(H_recon)-np.min(H_recon));
     
-    return H, H_recon
+    # DOWNSAMPLING ! ------------------------------------------------------------------------------
+    
+    # create 1x downsampled image (1 um/pixel)
+    Idown = skt.downscale_local_mean(H, (2,2))/1
+    #Idown = cv2.resize(Idown, dsize=(1000,1000), interpolation=cv2.INTER_NEAREST) 
+    Idown = (Idown-np.min(Idown))/(np.max(Idown)-np.min(Idown));
+    Xdown, X_lldown, mudown, Wdown = SPR_recon(Idown, z, wave_len=405e-9, pixel_dim=pixsize*2)
+    Idown_recon = np.abs(Xdown)
+    Idown_recon = (Idown_recon-np.min(Idown_recon))/(np.max(Idown_recon)-np.min(Idown_recon));
+    
+    # create 2x downsampled image (2 um/pixel)
+    Idown2 = skt.downscale_local_mean(H, (4,4))/1
+    #Idown2 = cv2.resize(Idown2, dsize=(1000,1000), interpolation=cv2.INTER_NEAREST) 
+    Idown2 = (Idown2-np.min(Idown2))/(np.max(Idown2)-np.min(Idown2));
+    Xdown2, X_lldown2, mudown2, Wdown2 = SPR_recon(Idown2, z, wave_len=405e-9, pixel_dim=pixsize*4)
+    Idown2_recon = np.abs(Xdown2)   
+    Idown2_recon = (Idown2_recon-np.min(Idown2_recon))/(np.max(Idown2_recon)-np.min(Idown2_recon));
+
+    return H, H_recon, Idown, Idown_recon, Idown2, Idown2_recon
 
 def compareRecon(im1, im2):
     """Compare image intensity values between two images.
@@ -168,18 +188,6 @@ if __name__ == '__main__':
     I = cv2.imread('circles_drawn.png',cv2.IMREAD_GRAYSCALE)
     I = I/1
     
-    # create 1x downsampled image (1 um/pixel)
-    Idown = skt.downscale_local_mean(I, (2,2))/1
-    #Idown = cv2.resize(Idown, dsize=(1000,1000), interpolation=cv2.INTER_NEAREST) 
-    Idown = Idown * np.max(I)/np.max(Idown)
-    
-    # create 2x downsampled image (2 um/pixel)
-    Idown2 = skt.downscale_local_mean(I, (4,4))/1
-    #Idown2 = cv2.resize(Idown2, dsize=(1000,1000), interpolation=cv2.INTER_NEAREST) 
-    Idown2 = Idown2 * np.max(I)/np.max(Idown2)
-    
-    # ----------------------------------------------------------------------------
-    
     # sample over varying distances
     z_range = np.linspace(500e-6, 8000e-6, num=16)
 
@@ -188,39 +196,45 @@ if __name__ == '__main__':
         plt.suptitle('%4.0fum Focal Depth' % (z*10e5))
         
         # get hologram and reconstruction arrays from algorithm
-        I_hol, I_recon = createImage(I,z,0.5e-6)
-        Idown_hol, Idown_recon = createImage(Idown,z,1.0e-6)
-        Idown2_hol, Idown2_recon = createImage(Idown2,z,2.0e-6)
+        I_hol, I_recon, Idown_hol, Idown_recon, Idown2_hol, Idown2_recon = createImage(I,z,0.5e-6)
         
         # plot hologram and reconstruction of data
         plt.subplot(3,2,1)
         plt.imshow(I_hol, cmap='gray')
         plt.title('Hologram (0.5 um/pixel)')
+        plt.colorbar()
         plt.subplot(3,2,2)
-        plt.imshow(I_recon, cmap='gray')
+        plt.imshow(I_recon, cmap='gist_earth')
         plt.title('Reconstruction (0.5 um/pixel)')
+        plt.colorbar()
         
         # plot hologram and reconstruction of downsampled data
         plt.subplot(3,2,3)
         plt.imshow(Idown_hol, cmap='gray')
         plt.title('Downsampled (2,2) Hologram (1 um/pixel)')
+        plt.colorbar()
         plt.subplot(3,2,4)
-        plt.imshow(Idown_recon, cmap='gray')
+        plt.imshow(Idown_recon, cmap='gist_earth')
         plt.title('Downsampled (2,2) Reconstruction (1 um/pixel)')
+        plt.colorbar()
         
         # plot hologram and reconstruction of downsampled data
         plt.subplot(3,2,5)
         plt.imshow(Idown2_hol, cmap='gray')
         plt.title('Downsampled (4,4) Hologram (2 um/pixel)')
+        plt.colorbar()
         plt.subplot(3,2,6)
-        plt.imshow(Idown2_recon, cmap='gray')
+        plt.imshow(Idown2_recon, cmap='gist_earth')
         plt.title('Downsampled (4,4) Reconstruction (2 um/pixel)')
+        plt.colorbar()
         
         # save figure
         plt.savefig('output-images/output-focaldepth_%04.0fmicrons.png' % (z*10e5))
         
         # compare reconstruction intensities
         #compareRecon(I_recon, Idown_recon)
+        
+        print('done')
     
     #plt.show()
     

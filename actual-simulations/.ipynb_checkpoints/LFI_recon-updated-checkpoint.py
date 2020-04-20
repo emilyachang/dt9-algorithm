@@ -107,7 +107,7 @@ def SPR_recon(H, z, lam=1.0, wave_len=637e-9, pixel_dim=1.12e-6, num_iter=10):
     
     return X, X_ll, mu, W
 
-def createImage(I,z):
+def createImage(I,z,pixsize):
     """Import ground truth image and return array containing hologram and reconstruction.
     
     This function returns arrays representing the images of the hologram and reconstruction
@@ -116,6 +116,7 @@ def createImage(I,z):
     Args:
         I - The input ground truth image.
         z - The focal depth to reconstruct at.
+        pixsize - The dimension of the image sensor pixels.
         
     Returns:
         H - The simulated hologram for the input image.
@@ -126,7 +127,7 @@ def createImage(I,z):
     I[I>1] = np.exp(np.pi*1.0j)
 
     #Make the hologram by projecting to the image plane
-    T = WAS_xfer(z, 405e-9, I.shape, 1.12e-6)
+    T = WAS_xfer(z, 405e-9, I.shape, pixsize)
     H = np.abs(ifft2(T*fft2(I)))
     
     #Scale the hologram to the range [0,16]
@@ -134,7 +135,7 @@ def createImage(I,z):
     H = 16*H/np.max(H)
     
     #Now do the reconstruction; reconstruction has the background illumination (mu) subtracted out
-    X, X_ll, mu, W = SPR_recon(H, z, wave_len=405e-9)
+    X, X_ll, mu, W = SPR_recon(H, z, wave_len=405e-9, pixel_dim=pixsize)
     H_recon = np.abs(X)
     
     return H, H_recon
@@ -187,9 +188,9 @@ if __name__ == '__main__':
         plt.suptitle('%4.0fum Focal Depth' % (z*10e5))
         
         # get hologram and reconstruction arrays from algorithm
-        I_hol, I_recon = createImage(I,z)
-        Idown_hol, Idown_recon = createImage(Idown,z)
-        Idown2_hol, Idown2_recon = createImage(Idown2,z)
+        I_hol, I_recon = createImage(I,z,0.5e-6)
+        Idown_hol, Idown_recon = createImage(Idown,z,1.0e-6)
+        Idown2_hol, Idown2_recon = createImage(Idown2,z,2.0e-6)
         
         # plot hologram and reconstruction of data
         plt.subplot(3,2,1)
@@ -220,7 +221,7 @@ if __name__ == '__main__':
         
         # compare reconstruction intensities
         #compareRecon(I_recon, Idown_recon)
-        
+    
     #plt.show()
     
     
