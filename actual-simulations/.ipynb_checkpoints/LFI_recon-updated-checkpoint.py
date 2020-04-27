@@ -165,7 +165,7 @@ def compareRecon(im1, im2):
 if __name__ == '__main__':
     
     # original image (0.5 um/pixel)
-    I = cv2.imread('circles_drawn.png',cv2.IMREAD_GRAYSCALE)
+    I = cv2.imread('hotdog.png',cv2.IMREAD_GRAYSCALE)
     I = I/1
     
     # create 1x downsampled image (1 um/pixel)
@@ -190,7 +190,7 @@ if __name__ == '__main__':
         # get hologram and reconstruction arrays from algorithm
         I_hol, I_recon = createImage(I,z,0.5e-6)
         Idown_hol, Idown_recon = createImage(Idown,z,1.0e-6)
-        Idown2_hol, Idown2_recon = createImage(Idown2,z,2.0e-6)
+#         Idown2_hol, Idown2_recon = createImage(Idown2,z,2.0e-6)
         
         # plot hologram and reconstruction of data
         plt.subplot(3,2,1)
@@ -208,20 +208,21 @@ if __name__ == '__main__':
         plt.imshow(Idown_recon, cmap='gray')
         plt.title('Downsampled (2,2) Reconstruction (1 um/pixel)')
         
-        # plot hologram and reconstruction of downsampled data
-        plt.subplot(3,2,5)
-        plt.imshow(Idown2_hol, cmap='gray')
-        plt.title('Downsampled (4,4) Hologram (2 um/pixel)')
-        plt.subplot(3,2,6)
-        plt.imshow(Idown2_recon, cmap='gray')
-        plt.title('Downsampled (4,4) Reconstruction (2 um/pixel)')
+#         # plot hologram and reconstruction of downsampled data
+#         plt.subplot(3,2,5)
+#         plt.imshow(Idown2_hol, cmap='gray')
+#         plt.title('Downsampled (4,4) Hologram (2 um/pixel)')
+#         plt.subplot(3,2,6)
+#         plt.imshow(Idown2_recon, cmap='gray')
+#         plt.title('Downsampled (4,4) Reconstruction (2 um/pixel)')
         
         # save figure
-        plt.savefig('output-images/output-focaldepth_%04.0fmicrons.png' % (z*10e5))
-        
+#         plt.savefig('output-images/output-focaldepth_%04.0fmicrons.png' % (z*10e5))
+        plt.savefig('goodbye.png')
+        break;
         # compare reconstruction intensities
         #compareRecon(I_recon, Idown_recon)
     
-    #plt.show()
+    plt.show()
     
     

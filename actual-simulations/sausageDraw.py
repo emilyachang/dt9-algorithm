@@ -39,19 +39,24 @@ def draw_circles(img, n=15):
     M = np.concatenate((M, np.exp(M[:,2] * 2j * np.pi).reshape(n, 1)), axis=1);
     
     # draw circles
-    for i in range(n):
-        cv2.rectangle(img, (x[i], y[i]), (x[i] + r[i], y[i]), color=255, thickness=-1);
+#     for i in range(n):
+#         cv2.rectangle(img, (x[i], y[i]), (x[i] + r[i], y[i]), color=255, thickness=-1);
     img[img == 0] = 1;
     
     return img;
 
-def make_sausage(img):
+def make_sausage(img, n):
+    nx, ny = np.shape(img);
     cv2.imwrite('base.png', img);
     img = cv2.imread('base.png', cv2.IMREAD_COLOR);
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) / 255.0
-    cv2.rectangle(img, (200, 200), (216, 216), color=255, thickness=-1);
-    cv2.circle(img, (200, 208), 8, color=255, thickness=-1)
-    cv2.circle(img, (216, 208), 8, color=255, thickness=-1)
+    x = np.random.choice(nx, n).reshape((n, 1));
+    for i in range(n):
+        cv2.rectangle(img, (x[i], x[i]), (x[i], x[i]+2), color=255, thickness=-1);
+
+#     cv2.rectangle(img, (200, 200), (216, 216), color=255, thickness=-1);
+#     cv2.circle(img, (200, 208), 8, color=255, thickness=-1)
+#     cv2.circle(img, (216, 208), 8, color=255, thickness=-1)
     img[img == 0] = 1;
 
     img = cv2.imwrite('hotdog.png', img);
@@ -63,7 +68,7 @@ def main():
         num_circles = 5
         # create base black image
         img = np.zeros((1000, 1000));
-        make_sausage(img)
+        make_sausage(img, num_circles)
         
         return 0
 

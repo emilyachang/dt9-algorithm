@@ -135,7 +135,7 @@ def createImage(I,z,pixsize):
     #Scale the hologram to the range [0,16]
     H = H-np.min(H)
     H = 16*H/np.max(H)
-    H = (H-np.min(H))/(np.max(H)-np.min(H));
+#     H = (H-np.min(H))/(np.max(H)-np.min(H));
 
     #Now do the reconstruction; reconstruction has the background illumination (mu) subtracted out
     X, X_ll, mu, W = SPR_recon(H, z, wave_len=405e-9, pixel_dim=pixsize)
@@ -146,16 +146,18 @@ def createImage(I,z,pixsize):
     
     # create 1x downsampled image (1 um/pixel)
     Idown = skt.downscale_local_mean(H, (2,2))/1
-    #Idown = cv2.resize(Idown, dsize=(1000,1000), interpolation=cv2.INTER_NEAREST) 
-    Idown = (Idown-np.min(Idown))/(np.max(Idown)-np.min(Idown));
+    Idown = Idown-np.min(Idown)
+    Idown = 16*Idown/np.max(Idown)
+    
     Xdown, X_lldown, mudown, Wdown = SPR_recon(Idown, z, wave_len=405e-9, pixel_dim=pixsize*2)
     Idown_recon = np.abs(Xdown)
     Idown_recon = (Idown_recon-np.min(Idown_recon))/(np.max(Idown_recon)-np.min(Idown_recon));
-    
+
     # create 2x downsampled image (2 um/pixel)
     Idown2 = skt.downscale_local_mean(H, (4,4))/1
-    #Idown2 = cv2.resize(Idown2, dsize=(1000,1000), interpolation=cv2.INTER_NEAREST) 
-    Idown2 = (Idown2-np.min(Idown2))/(np.max(Idown2)-np.min(Idown2));
+    Idown2 = Idown2-np.min(Idown2)
+    Idown2 = 16*Idown2/np.max(Idown2)
+    
     Xdown2, X_lldown2, mudown2, Wdown2 = SPR_recon(Idown2, z, wave_len=405e-9, pixel_dim=pixsize*4)
     Idown2_recon = np.abs(Xdown2)   
     Idown2_recon = (Idown2_recon-np.min(Idown2_recon))/(np.max(Idown2_recon)-np.min(Idown2_recon));
@@ -177,33 +179,44 @@ def compareRecon(im1, im2):
     """
     
     print(np.max(im1), np.max(im2))
-    print(np.max(np.abs(im1-im2)))
+    print(np.mean(np.abs(im1-im2)))
+    im1[im1 >= np.max(im1) * 0.5] = 255
+    im1[im1 < np.max(im1) * 0.5] = 0
+    im2[im2 >= np.max(im2) * 0.5] = 255
+    im2[im2 < np.max(im2) * 0.5] = 0
     
-    #plt.figure()
-    #plt.title('Comparing Reconstructions')
-    #plt.imshow(np.abs(im1-im2), cmap='gray');
+    a = []
+    b = 0
+    for i in range(im1.shape[0]):
+        for j in range(im1.shape[1]):
+            if ((im1[i][j] > 0 and im2[i][j] == 0)):
+#                 a.append(np.abs(im1[i][j]-im2[i][j]))
+                b += 1
+                
+    print(b)
     
+    plt.figure()
+    plt.title('Comparing Reconstructions')
+    plt.imshow(np.abs(im1-im2), cmap='gray')
+    plt.show()
 
 def upsample(I):
     
     x = I.shape[0]
     y = I.shape[1]
-    tmp = np.zeros((2*x, 2*y))
+    tmp = np.zeros((x, 2*y))
     
-    for i in range(x):
-        tmp[2*i:2*i + 1, :] = np.concatenate((I[i, :].reshape(x, 1), I[i, :].reshape(x, 1)))
-#         tmp[2*i + 1, :] = I[i, :]
-    print(np.concatenate((I[0, :].reshape(x, 1), I[0, :].reshape(x, 1))).shape)
-
-#     tmp = np.concatenate((tmp, np.zeros((2*x, y))), axis=1)
-    print(tmp.shape)
-
     for i in range(y):
-        tmp[:, 2*i:2*i + 1] = np.concatenate((I[:, i].reshape(1, y), I[:, i].reshape(1, y)), axis=1).T
-#         tmp[:, 2*i] = I[:, i]
-#         tmp[:, 2*i + 1] = I[:, i]
+        tmp[:, 2*i] = I[:, i]
+        tmp[:, 2*i+1] = I[:, i]
+
+    tmp2 = np.zeros((2*x, 2*y))
+
+    for i in range(x):
+        tmp2[2*i, :] = tmp[i, :]
+        tmp2[2*i+1, :] = tmp[i, :]
         
-    return tmp;
+    return tmp2;
     
 if __name__ == '__main__':
     
@@ -211,21 +224,23 @@ if __name__ == '__main__':
     I = cv2.imread('hotdog.png',cv2.IMREAD_GRAYSCALE)
     I = I/1
     
-    I = upsample(I);
-    plt.imshow(I, cmap='gray')
-    plt.show()
+#     I = upsample(I);
+#     plt.imshow(I, cmap='gray')
+#     plt.show()
 
     # sample over varying distances
     z_range = np.linspace(500e-6, 8000e-6, num=16)
 
     for z in z_range: 
-        break;
 #         z = 8000e-6
         plt.figure(figsize=(10,12))
         plt.suptitle('%4.0fum Focal Depth' % (z*10e5))
         
         # get hologram and reconstruction arrays from algorithm
         I_hol, I_recon, Idown_hol, Idown_recon, Idown2_hol, Idown2_recon = createImage(I,z,0.5e-6)
+        
+        Idown_recon = upsample(Idown_recon)
+        Idown2_recon = upsample(upsample(Idown2_recon))
         
         # plot hologram and reconstruction of data
         plt.subplot(3,2,1)
@@ -262,7 +277,15 @@ if __name__ == '__main__':
         plt.savefig('hello.png')
 
         # compare reconstruction intensities
-        #compareRecon(I_recon, Idown_recon)
+        Itmp = np.pad(I, (100, 100))
+        Itmp = (Itmp - np.min(Itmp)) / (np.max(Itmp) - np.min(Itmp))
+        print(np.min(I_recon), np.min(Idown_recon), np.min(Idown2_recon), np.min(Itmp))
+        print(np.max(I_recon), np.max(Idown_recon), np.max(Idown2_recon), np.max(Itmp))
+
+        compareRecon(Itmp, Itmp)
+        compareRecon(Itmp, I_recon)
+        compareRecon(Itmp, Idown_recon)
+        compareRecon(Itmp, Idown2_recon)
         
         print('done')
         break;
