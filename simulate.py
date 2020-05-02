@@ -177,24 +177,3 @@ if __name__ == '__main__':
             img = cv2.imwrite('output-images/%02.f-particles/%02.f_circles_hol_focaldepth_%04.0fmicrons_full.png' % (c, c, z*10e5), I_hol);
             img = cv2.imwrite('output-images/%02.f-particles/%02.f_circles_hol_focaldepth_%04.0fmicrons_down2.png' % (c, c, z * 10e5), Idown_hol);
             img = cv2.imwrite('output-images/%02.f-particles/%02.f_circles_hol_focaldepth_%04.0fmicrons_down4.png' % (c, c, z * 10e5), Idown2_hol);
-
-            # plot hologram and reconstruction of data
-            plt.subplot(3, 1, 1)
-            plt.imshow(I_hol, cmap='gray')
-            plt.title('Hologram (0.5 um/pixel)')
-            plt.colorbar()
-
-            # plot hologram and reconstruction of downsampled data
-            plt.subplot(3, 1, 2)
-            plt.imshow(Idown_hol, cmap='gray')
-            plt.title('Downsampled (2,2) Hologram (1 um/pixel)')
-            plt.colorbar()
-
-            # plot hologram and reconstruction of downsampled data
-            plt.subplot(3, 1, 3)
-            plt.imshow(Idown2_hol, cmap='gray')
-            plt.title('Downsampled (4,4) Hologram (2 um/pixel)')
-            plt.colorbar()
-
-            # save figure
-            plt.savefig('output-images/%02.f-particles/output-focaldepth_%04.0fmicrons.png' % (c, z*10e5))
