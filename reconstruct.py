@@ -177,6 +177,8 @@ if __name__ == '__main__':
             img = cv2.imwrite('output-images/%02.f-particles/%02.f_circles_recon_focaldepth_%04.0fmicrons_down2.png' % (c, c, z * 10e5), Idown_recon);
             img = cv2.imwrite('output-images/%02.f-particles/%02.f_circles_recon_focaldepth_%04.0fmicrons_down4.png' % (c, c, z * 10e5), Idown2_recon);
 
+            plt.figure(figsize=(10,12))
+            plt.suptitle('%4.0fum Focal Depth' % (z*10e5))
             plt.subplot(3, 2, 1)
             plt.imshow(I, cmap='gray')
             plt.title('Hologram (0.5 um/pixel)')

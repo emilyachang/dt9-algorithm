@@ -129,7 +129,7 @@ def createImage(I, z, pixsize):
     # I[I==255] = np.exp(np.pi*1.0j)
     I = np.pad(I, (100, 100))
     I[I == 0] = 1
-    I[I > 1] = np.exp(np.pi * 1.0j)
+    I[I>1] = np.exp(np.pi*1.0j)
 
     # Make the hologram by projecting to the image plane
     T = WAS_xfer(z, 405e-9, I.shape, pixsize)
@@ -138,7 +138,7 @@ def createImage(I, z, pixsize):
     # Scale the hologram to the range [0,16]
     H = H - np.min(H)
     H = 16 * H / np.max(H)
-
+    
     # DOWNSAMPLING ! ------------------------------------------------------------------------------
 
     # create 1x downsampled image (1 um/pixel)
