@@ -159,18 +159,18 @@ if __name__ == '__main__':
 
         for z in z_range:
             I = cv2.imread('output-images/%02.f-particles/%02.f_circles_hol_focaldepth_%04.0fmicrons_full.png' % (c, c, z*10e5), cv2.IMREAD_GRAYSCALE)
-            I = I / 1
+            I = I / 16
 
             I_down = cv2.imread('output-images/%02.f-particles/%02.f_circles_hol_focaldepth_%04.0fmicrons_down2.png' % (c, c, z * 10e5), cv2.IMREAD_GRAYSCALE)
-            I_down = I_down / 1
+            I_down = I_down / 16
 
             I_down2 = cv2.imread('output-images/%02.f-particles/%02.f_circles_hol_focaldepth_%04.0fmicrons_down4.png' % (c, c, z * 10e5), cv2.IMREAD_GRAYSCALE)
-            I_down2 = I_down2 / 1
+            I_down2 = I_down2 / 16
 
             plt.figure(figsize=(10, 12))
             plt.suptitle('%4.0fum Focal Depth' % (z * 10e5))
 
-            # get hologram and reconstruction arrays from algorithm
+            # get reconstruction arrays from algorithm
             I_recon, Idown_recon, Idown2_recon = reconImage(I, I_down, I_down2, z, 0.5e-6)
 
             img = cv2.imwrite('output-images/%02.f-particles/%02.f_circles_recon_focaldepth_%04.0fmicrons_full.png' % (c, c, z*10e5), I_recon);
@@ -208,5 +208,7 @@ if __name__ == '__main__':
 
             # save figure
             plt.savefig('output-images/%02.f-particles/output-focaldepth_%04.0fmicrons.png' % (c, z*10e5))
+    
+    plt.show();
     
     

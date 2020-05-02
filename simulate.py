@@ -168,10 +168,8 @@ if __name__ == '__main__':
         z_range = np.linspace(500e-6, 8000e-6, num=16)
 
         for z in z_range:
-            plt.figure(figsize=(10, 12))
-            plt.suptitle('%4.0fum Focal Depth' % (z * 10e5))
 
-            # get hologram and reconstruction arrays from algorithm
+            # get hologram arrays from algorithm
             I_hol, Idown_hol, Idown2_hol = createImage(I, z, 0.5e-6)
 
             img = cv2.imwrite('output-images/%02.f-particles/%02.f_circles_hol_focaldepth_%04.0fmicrons_full.png' % (c, c, z*10e5), I_hol);
